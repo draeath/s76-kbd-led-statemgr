@@ -1,0 +1,11 @@
+{
+    "basepath": "/sys/class/leds/",
+    "brightness": {
+        "path": "system76_acpi::kbd_backlight/brightness",
+        "enable": true
+    },
+    "color": {
+        "path": "system76_acpi::kbd_backlight/color",
+        "enable": true
+    }
+}
