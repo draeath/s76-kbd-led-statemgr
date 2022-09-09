@@ -1,11 +1,11 @@
 {
-    "basepath": "/sys/class/leds/",
-    "brightness": {
-        "path": "system76_acpi::kbd_backlight/brightness",
-        "enable": true
-    },
-    "color": {
-        "path": "system76_acpi::kbd_backlight/color",
-        "enable": true
-    }
+  "brightness": {
+    "path": "/sys/class/leds/system76_acpi::kbd_backlight/brightness",
+    "default": "48"
+  },
+  "color": {
+    "path": "/sys/class/leds/system76_acpi::kbd_backlight/color",
+    "default": "FF0000"
+  },
+  "state_path": "/var/lib/s76-kbd-led-statemgr/state.json"
 }
