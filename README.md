@@ -16,7 +16,9 @@ Fortunately, `/sys/class/leds/system76_acpi::kbd_backlight/` provides a simple t
 
 ### Installation
 
-* TBD
+* Place the python script somewhere, with executable permissions. For safety, prohibit modification by regular users.
+* Symlink the script under `/usr/lib/systemd/system-sleep/` as per [systemd-suspend.service](https://www.freedesktop.org/software/systemd/man/systemd-suspend.service.html)
+* Copy s76-kbd-led-statemgr.service to `/etc/systemd/system`, run `systemd daemon-reload && systemctl enable --now s76-kbd-led-statemgr.service`
 
 ### Execution
 

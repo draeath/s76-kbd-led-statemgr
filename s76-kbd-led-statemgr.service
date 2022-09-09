@@ -1,0 +1,17 @@
+[Unit]
+Description=Save and restore System76 keyboard backlight state across poweroff
+Documentation=https://github.com/draeath/s76-kbd-led-statemgr/blob/master/README.md
+After=local-fs.target
+Requisite=local-fs.target
+RequiresMountsFor=/usr/local/bin
+RequiresMountsFor=/var/lib/s76-kbd-led-statemgr
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/s76-kbd-led-statemgr.py post
+ExecStop=/usr/local/bin/s76-kbd-led-statemgr.py pre
+Restart=no
+
+[Install]
+WantedBy=basic.target
