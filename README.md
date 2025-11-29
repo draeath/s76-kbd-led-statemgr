@@ -27,3 +27,7 @@ Fortunately, `/sys/class/leds/system76_acpi::kbd_backlight/` provides a simple t
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](./LICENSE.txt) file for details
+
+## AI disclaimer
+
+This project has used Google Gemini via [AIDER](https://aider.chat) for various tasks. `dbc97930ca41a89ecf2d7aff604b4a3b0681771f` (2024-10) was the last commit before this usage, and `e9733b184b98207497614f3c4183875813286980` (2025-11) was the first commit to use it.
