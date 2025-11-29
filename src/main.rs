@@ -147,7 +147,7 @@ fn do_post(config: &Config, is_root: bool) -> Result<(), Box<dyn std::error::Err
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
-    let is_root = std::os::unix::process::geteuid() == 0;
+    let is_root = unsafe { libc::geteuid() == 0 };
     #[cfg(not(unix))]
     let is_root = false;
 
