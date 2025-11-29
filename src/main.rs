@@ -73,7 +73,16 @@ fn read_state(config: &Config) -> State {
     default_state
 }
 
-fn write_state(config: &Config, state: &State) -> Result<(), Box<dyn std::error::Error>> {
+fn write_state(config: &Config, state: &State, is_root: bool) -> Result<(), Box<dyn std::error::Error>> {
+    if !is_root {
+        println!(
+            "DRY-RUN: Would write state to '{}':\n{}",
+            config.state_path.display(),
+            serde_json::to_string_pretty(state)?
+        );
+        return Ok(());
+    }
+
     if let Some(parent) = config.state_path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -86,13 +95,27 @@ fn write_state(config: &Config, state: &State) -> Result<(), Box<dyn std::error:
     Ok(())
 }
 
-fn apply_state(config: &Config, state: &State) -> Result<(), Box<dyn std::error::Error>> {
+fn apply_state(config: &Config, state: &State, is_root: bool) -> Result<(), Box<dyn std::error::Error>> {
+    if !is_root {
+        println!(
+            "DRY-RUN: Would write brightness '{}' to '{}'",
+            state.brightness,
+            config.brightness.path.display()
+        );
+        println!(
+            "DRY-RUN: Would write color '{}' to '{}'",
+            state.color,
+            config.color.path.display()
+        );
+        return Ok(());
+    }
+
     fs::write(&config.brightness.path, format!("{}\n", state.brightness))?;
     fs::write(&config.color.path, format!("{}\n", state.color))?;
     Ok(())
 }
 
-fn do_pre(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+fn do_pre(config: &Config, is_root: bool) -> Result<(), Box<dyn std::error::Error>> {
     let brightness = fs::read_to_string(&config.brightness.path)?
         .trim()
         .to_string();
@@ -114,15 +137,20 @@ fn do_pre(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let state = State { brightness, color };
-    write_state(config, &state)
+    write_state(config, &state, is_root)
 }
 
-fn do_post(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+fn do_post(config: &Config, is_root: bool) -> Result<(), Box<dyn std::error::Error>> {
     let state = read_state(config);
-    apply_state(config, &state)
+    apply_state(config, &state, is_root)
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(unix)]
+    let is_root = std::os::unix::process::geteuid() == 0;
+    #[cfg(not(unix))]
+    let is_root = false;
+
     let args: Vec<String> = env::args().collect();
     let transition = args
         .get(1)
@@ -131,8 +159,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = read_configuration();
 
     match transition.as_str() {
-        "pre" => do_pre(&config),
-        "post" => do_post(&config),
+        "pre" => do_pre(&config, is_root),
+        "post" => do_post(&config, is_root),
         _ => Err(format!("Invalid argument '{}', must be 'pre' or 'post'", transition).into()),
     }
 }
