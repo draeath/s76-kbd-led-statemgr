@@ -5,6 +5,7 @@
 
 import argparse
 import json
+import os
 import pathlib
 import re
 from typing import Any
@@ -64,26 +65,36 @@ def read_state(configuration: dict) -> dict:
     return default_state
 
 
-def write_state(configuration: dict, state: dict) -> None:
+def write_state(configuration: dict, state: dict, is_root: bool) -> None:
     """Writes keyboard state to disk."""
     state_path = configuration["state_path"]
+    if not is_root:
+        pretty_state = json.dumps(state, indent=2)
+        print(f"DRY-RUN: Would write state to '{state_path}':\n{pretty_state}")
+        return
     pathlib.Path(state_path).parent.mkdir(parents=True, exist_ok=True)
     with open(state_path, "wt", encoding="utf-8") as out_file:
         json.dump(state, out_file, indent=2)
         out_file.write("\n")
 
 
-def apply_state(configuration: dict, state: dict) -> None:
+def apply_state(configuration: dict, state: dict, is_root: bool) -> None:
     """Applies keyboard state to the system."""
     brightness_path = configuration["brightness"]["path"]
     color_path = configuration["color"]["path"]
+    if not is_root:
+        print(
+            f"DRY-RUN: Would write brightness '{state['brightness']}' to '{brightness_path}'"
+        )
+        print(f"DRY-RUN: Would write color '{state['color']}' to '{color_path}'")
+        return
     with open(brightness_path, "wt", encoding="utf-8") as brightness_file:
         brightness_file.write(state["brightness"] + "\n")
     with open(color_path, "wt", encoding="utf-8") as color_file:
         color_file.write(state["color"] + "\n")
 
 
-def do_pre(configuration: dict) -> None:
+def do_pre(configuration: dict, is_root: bool) -> None:
     """Reads current keyboard state and saves it before a power event."""
     with open(
         configuration["brightness"]["path"], "rt", encoding="utf-8"
@@ -93,13 +104,13 @@ def do_pre(configuration: dict) -> None:
     with open(configuration["color"]["path"], "rt", encoding="utf-8") as color_file:
         color = color_file.readline().strip()
         check_valid_str(color, source=color_file.name)
-    write_state(configuration, {"brightness": brightness, "color": color})
+    write_state(configuration, {"brightness": brightness, "color": color}, is_root)
 
 
-def do_post(configuration: dict) -> None:
+def do_post(configuration: dict, is_root: bool) -> None:
     """Applies saved keyboard state after a power event."""
     state = read_state(configuration)
-    apply_state(configuration, state)
+    apply_state(configuration, state, is_root)
 
 
 def main() -> None:
@@ -115,11 +126,12 @@ def main() -> None:
     )
     args = parser.parse_known_args()[0]
     configuration = read_configuration()
+    is_root = os.geteuid() == 0
 
     if args.transition == "pre":
-        do_pre(configuration)
+        do_pre(configuration, is_root)
     elif args.transition == "post":
-        do_post(configuration)
+        do_post(configuration, is_root)
 
 
 if __name__ == "__main__":
