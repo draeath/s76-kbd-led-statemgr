@@ -1,0 +1,14 @@
+[package]
+name = "s76-kbd-led-statemgr"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/draeath/s76-kbd-led-statemgr"
+rust-version = "1.91.1"
+
+[profile.release]
+opt-level = "s"
+strip = "symbols"
+lto = "fat"
+
+[dependencies]
