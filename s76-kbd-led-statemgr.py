@@ -50,7 +50,7 @@ def read_state(configuration: dict) -> dict:
             if not 0 <= int(state["brightness"]) <= 255:
                 state["brightness"] = default_brightness
             if not re.fullmatch(r"^(00|FF){3}$", state["color"]):
-                state["brightness"] = default_color
+                state["color"] = default_color
     except Exception:
         state = {"brightness": default_brightness, "color": default_color}
     return state
