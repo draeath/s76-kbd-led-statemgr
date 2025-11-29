@@ -35,25 +35,26 @@ def read_configuration() -> dict:
 
 
 def check_valid_str(value, source: str = None) -> None:
-    if (type(value) is not str) or (len(value) == 0):
+    if not isinstance(value, str) or not value:
         raise RuntimeError(f"Invalid value read from '{source}'")
 
 
 def read_state(configuration: dict) -> dict:
     default_brightness = configuration["brightness"]["default"]
     default_color = configuration["color"]["default"]
+    default_state = {"brightness": default_brightness, "color": default_color}
     state_path = configuration["state_path"]
     # noinspection PyBroadException
     try:
         with open(state_path, "rt") as state_file:
             state = json.load(state_file)
-            if not 0 <= int(state["brightness"]) <= 255:
-                state["brightness"] = default_brightness
-            if not re.fullmatch(r"^(00|FF){3}$", state["color"]):
-                state["color"] = default_color
+            if (0 <= int(state["brightness"]) <= 255 and
+                    re.fullmatch(r"^(00|FF){3}$", state["color"])):
+                return state
     except Exception:
-        state = {"brightness": default_brightness, "color": default_color}
-    return state
+        pass  # Fall through to return default state
+
+    return default_state
 
 
 def write_state(configuration: dict, state: dict):
