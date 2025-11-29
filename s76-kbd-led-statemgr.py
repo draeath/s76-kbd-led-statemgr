@@ -111,7 +111,7 @@ def main() -> None:
         "transition",
         type=str,
         help="The [pre|post] keyword from systemd-suspend.service",
-        choices=['pre', 'post'],
+        choices=["pre", "post"],
     )
     args = parser.parse_known_args()[0]
     configuration = read_configuration()
