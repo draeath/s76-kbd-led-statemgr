@@ -58,27 +58,19 @@ fn read_state(config: &Config) -> State {
         color: config.color.default.clone(),
     };
 
-    let Ok(file) = File::open(&config.state_path) else {
-        return default_state;
-    };
+    if let Ok(file) = File::open(&config.state_path) {
+        if let Ok(state) = serde_json::from_reader::<_, State>(file) {
+            let brightness_ok = state.brightness.parse::<u8>().is_ok();
+            let color_regex = Regex::new(r"^(00|FF){3}$").unwrap();
+            let color_ok = color_regex.is_match(&state.color);
 
-    let mut state: State = match serde_json::from_reader(file) {
-        Ok(s) => s,
-        Err(_) => return default_state,
-    };
-
-    // Validate brightness
-    if state.brightness.parse::<u8>().is_err() {
-        state.brightness = config.brightness.default.clone();
+            if brightness_ok && color_ok {
+                return state;
+            }
+        }
     }
 
-    // Validate color
-    let color_regex = Regex::new(r"^(00|FF){3}$").unwrap();
-    if !color_regex.is_match(&state.color) {
-        state.color = config.color.default.clone();
-    }
-
-    state
+    default_state
 }
 
 fn write_state(config: &Config, state: &State) -> Result<(), Box<dyn std::error::Error>> {
