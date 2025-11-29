@@ -68,9 +68,9 @@ def write_state(configuration: dict, state: dict):
 def apply_state(configuration: dict, state: dict):
     brightness_path = configuration["brightness"]["path"]
     color_path = configuration["color"]["path"]
-    with open(brightness_path, "at") as brightness_file:
+    with open(brightness_path, "wt") as brightness_file:
         brightness_file.write(state["brightness"] + "\n")
-    with open(color_path, "at") as color_file:
+    with open(color_path, "wt") as color_file:
         color_file.write(state["color"] + "\n")
 
 
@@ -97,10 +97,9 @@ def main():
         "transition",
         type=str,
         help="The [pre|post] keyword from systemd-suspend.service",
+        choices=['pre', 'post'],
     )
     args = parser.parse_known_args()[0]
-    if args.transition not in ["pre", "post"]:
-        raise ValueError(f"Invalid argument '{args.transition}'")
     configuration = read_configuration()
 
     if args.transition == "pre":
