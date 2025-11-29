@@ -247,3 +247,4 @@ fabric.properties
 # Added by cargo
 
 /target
+.aider*
